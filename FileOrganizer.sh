@@ -1,7 +1,15 @@
 #!/bin/bash
 
+function help()
+{
+	whiptail --title "Segítség" --msgbox "Ez a program egy megadott mappából (első menüpontban lehet beállítani) egy cél mappába (második menüpontban lehet beállítani) rendezetten másolja a fájlokat a beállított paraméterek (hármas menüpont) alapján. Ha nem létezik a konfigurációs fájl, akkor a program azt automatikusan létrehozza." 16 60
+}
+
 function menu()
 {
+	if [ ! -f FileOrganizer.cfg ]; then
+    	touch FileOrganizer.cfg
+	fi
 
 	ADVSEL=$(whiptail --title "Menü" --fb --menu "Válasszon menüpontot" 20 60 10 \
 	"1" "Forrás mappa ellenőrzése és megadása"	\
@@ -14,7 +22,6 @@ function menu()
 
 	1)
 		echo "Forrás mappa ellenőrzése és megadása"
-		
 		;;
 	2)
 		echo "Cél mappa ellenőrzése és megadása"
@@ -24,6 +31,7 @@ function menu()
 		;;
 	4)
 		echo "Segítség"
+		help
 		;;
 	5)
 		echo "Kilépés"
