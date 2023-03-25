@@ -1,5 +1,19 @@
 #!/bin/bash
 
+function selectSourceFolder() 
+{
+	firstLine=$(head -n 1 FileOrganizer.cfg)
+
+ 	COLOR=$(whiptail --inputbox "" 8 80 $firstLine --title "Kérem írja be a forrás mappa elérési útját" 3>&1 1>&2 2>&3)
+}
+
+function selectTargetFolder() 
+{
+	secondLine=$(head -n 2 FileOrganizer.cfg | tail -n -1)
+
+ 	COLOR=$(whiptail --inputbox "" 8 80 $secondLine --title "Kérem írja be a cél mappa elérési útját" 3>&1 1>&2 2>&3)
+}
+
 function help()
 {
 	whiptail --title "Segítség" --msgbox "Ez a program egy megadott mappából (első menüpontban lehet beállítani) egy cél mappába (második menüpontban lehet beállítani) rendezetten másolja a fájlokat a beállított paraméterek (hármas menüpont) alapján. Ha nem létezik a konfigurációs fájl, akkor a program azt automatikusan létrehozza." 16 60
@@ -23,9 +37,11 @@ function menu()
 
 	1)
 		echo "Forrás mappa ellenőrzése és megadása"
+		selectSourceFolder
 		;;
 	2)
 		echo "Cél mappa ellenőrzése és megadása"
+		selectTargetFolder
 		;;
 	3)
 		echo "Fájlokra vonatkozó beállítások"
