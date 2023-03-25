@@ -2,16 +2,29 @@
 
 function selectSourceFolder() 
 {
-	firstLine=$(head -n 1 FileOrganizer.cfg)
+	firstLine=$(head -n 1 $fileNameFolder)
 
- 	COLOR=$(whiptail --inputbox "" 8 80 $firstLine --title "Kérem írja be a forrás mappa elérési útját" 3>&1 1>&2 2>&3)
+ 	src=$(whiptail --inputbox "" 8 80 $firstLine --title "Kérem írja be a forrás mappa elérési útját" 3>&1 1>&2 2>&3)
+
+ 	if [[ $src != "" && $firstLine != "" ]]; then		
+	 	sed -i "s@$firstLine@$src@" $fileNameFolder
+	fi
 }
 
 function selectTargetFolder() 
 {
-	secondLine=$(head -n 2 FileOrganizer.cfg | tail -n -1)
+	secondLine=$(head -n 2 $fileNameFolder | tail -n -1)
 
- 	COLOR=$(whiptail --inputbox "" 8 80 $secondLine --title "Kérem írja be a cél mappa elérési útját" 3>&1 1>&2 2>&3)
+ 	trg=$(whiptail --inputbox "" 8 80 $secondLine --title "Kérem írja be a cél mappa elérési útját" 3>&1 1>&2 2>&3)
+	 	
+	if [[ $trg != "" && $secondLine != "" ]]; then		
+		sed -i "s@$secondLine@$trg@" $fileNameFolder
+	fi
+}
+
+function setFileDetails()
+{
+	echo "sajt"
 }
 
 function help()
@@ -21,9 +34,16 @@ function help()
 
 function menu()
 {
-	if [ ! -f FileOrganizer.cfg ]; then
-		printf "%s/source\n" $PWD > FileOrganizer.cfg
-		printf "%s/target\n" $PWD >> FileOrganizer.cfg
+
+	fileNameFolder="FileOrganizerFolders.cfg"
+
+	if [ ! -f $fileNameFolder ]; then
+		printf "%s/source\n" $PWD > $fileNameFolder
+		printf "%s/target\n" $PWD >> $fileNameFolder
+	fi
+
+	if [ ! -f FileOrganizerFiles.cfg ]; then
+		touch FileOrganizerFiles.cfg
 	fi
 
 	ADVSEL=$(whiptail --title "Menü" --fb --menu "Válasszon menüpontot" 20 60 10 \
@@ -38,14 +58,15 @@ function menu()
 
 	1)
 		echo "Forrás mappa ellenőrzése és megadása"
-		selectSourceFolder
+		selectSourceFolder "$fileNameFolder"
 		;;
 	2)
 		echo "Cél mappa ellenőrzése és megadása"
-		selectTargetFolder
+		selectTargetFolder "$fileNameFolder"
 		;;
 	3)
 		echo "Fájlokra vonatkozó beállítások"
+		setFileDetails
 		;;
 	4)
 		echo "Fájlok másolása"
