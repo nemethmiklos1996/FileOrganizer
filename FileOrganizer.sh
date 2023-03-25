@@ -30,8 +30,9 @@ function menu()
 	"1" "Forrás mappa ellenőrzése és megadása"	\
 	"2" "Cél mappa ellenőrzése és megadása"		\
 	"3" "Fájlokra vonatkozó beállítások"		\
-	"4" "Segítség"					\
-	"5" "Kilépés"	3>&1 1>&2 2>&3)
+	"4" "Fájlok másolása"						\
+	"5" "Segítség"								\
+	"6" "Kilépés"	3>&1 1>&2 2>&3)
 
 	case $ADVSEL in
 
@@ -47,10 +48,13 @@ function menu()
 		echo "Fájlokra vonatkozó beállítások"
 		;;
 	4)
+		echo "Fájlok másolása"
+		;;
+	5)
 		echo "Segítség"
 		help
 		;;
-	5)
+	6)
 		echo "Kilépés"
 		exit
 		;;
