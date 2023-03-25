@@ -8,7 +8,8 @@ function help()
 function menu()
 {
 	if [ ! -f FileOrganizer.cfg ]; then
-    	touch FileOrganizer.cfg
+		printf "%s/source\n" $PWD > FileOrganizer.cfg
+		printf "%s/target\n" $PWD >> FileOrganizer.cfg
 	fi
 
 	ADVSEL=$(whiptail --title "Menü" --fb --menu "Válasszon menüpontot" 20 60 10 \
