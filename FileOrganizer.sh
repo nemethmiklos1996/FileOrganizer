@@ -54,20 +54,21 @@ function setFileDetails()
 			section="${section%]}"
 		elif [[ $section == $selectedFileName && $line == dir=* ]]; then
 			attr_dir="${line#*=}"
-			new_attr_dir=$(whiptail --inputbox "Adja meg a mappa nevét:" 8 50 "$attr_dir" 3>&1 1>&2 2>&3)
+			new_attr_dir=$(whiptail --inputbox "Adja meg a mappa nevét:" 8 50 "$attr_dir" --title "${fileNames[@]}" 3>&1 1>&2 2>&3)
 			sed -i "/^\[${selectedFileName}\]/,/^\[/s/^dir=.*/dir=$new_attr_dir/" "$fileNameFiles"
 		elif [[ $section == $selectedFileName && $line == subdir=* ]]; then
 			attr_subdir="${line#*=}"
-			new_attr_subdir=$(whiptail --inputbox "Szeretne dátummal ellátott almappát (0 nem, 1 igen):" 8 50 "$attr_subdir" 3>&1 1>&2 2>&3)
+			new_attr_subdir=$(whiptail --inputbox "Szeretne dátummal ellátott almappát (0 nem, 1 igen):" 8 50 "$attr_subdir" --title "${fileNames[@]}" 3>&1 1>&2 2>&3)
 			sed -i "/^\[${selectedFileName}\]/,/^\[/s/^subdir=.*/subdir=$new_attr_subdir/" "$fileNameFiles"
 		elif [[ $section == $selectedFileName && $line == rename=* ]]; then
 			attr_rename="${line#*=}"
-			new_attr_rename=$(whiptail --inputbox "Át szeretné nevezni a fájlokat (0 nem vagy a fájl neve):" 8 50 "$attr_rename" 3>&1 1>&2 2>&3)
+			new_attr_rename=$(whiptail --inputbox "Át szeretné nevezni a fájlokat (0 nem vagy a fájl neve):" 8 50 "$attr_rename" --title "${fileNames[@]}" 3>&1 1>&2 2>&3)
 			sed -i "/^\[${selectedFileName}\]/,/^\[/s/^rename=.*/rename=$new_attr_rename/" "$fileNameFiles"	  
 		fi
 	done < "$fileNameFiles"
 
 }
+
 
 function help()
 {
