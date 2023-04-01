@@ -6,6 +6,7 @@ function selectSourceFolder()
 	firstLine=$(head -n 1 $fileNameFolder)
 
  	src=$(whiptail --inputbox "" 8 80 $firstLine --title "Kérem írja be a forrás mappa elérési útját" 3>&1 1>&2 2>&3)
+	
 	# kicseréli a beírt elérési utat a jelenlegivel
  	if [[ $src != "" && $firstLine != "" ]]; then		
 	 	sed -i "s@$firstLine@$src@" $fileNameFolder
@@ -18,6 +19,7 @@ function selectTargetFolder()
 	secondLine=$(head -n 2 $fileNameFolder | tail -n -1)
 
  	trg=$(whiptail --inputbox "" 8 80 $secondLine --title "Kérem írja be a cél mappa elérési útját" 3>&1 1>&2 2>&3)
+	
 	# kicseréli a beírt elérési utat a jelenlegivel
 	if [[ $trg != "" && $secondLine != "" ]]; then		
 		sed -i "s@$secondLine@$trg@" $fileNameFolder
@@ -43,9 +45,9 @@ function setFileDetails()
 		fi
  
 	done < $fileNameFiles
-	
+
 	# kiolvasott fájlnevek alapján radio boxos kiválasztó menü
-	selectedFileName=$(whiptail --title "Fájlok" --radiolist "Válassza ki a beállítani kívánt típust" 20 78 4 "${fileNames[@]}" 3>&1 1>&2 2>&3)
+	selectedFileName=$(whiptail --title "Fájlok" --radiolist "Válassza ki a beállítani kívánt típust" 20 60 10 "${fileNames[@]}" "ÚJ" "" off  3>&1 1>&2 2>&3)
 
 	# config fájl átírása
 	while read -r line; do
@@ -54,21 +56,37 @@ function setFileDetails()
 			section="${section%]}"
 		elif [[ $section == $selectedFileName && $line == dir=* ]]; then
 			attr_dir="${line#*=}"
-			new_attr_dir=$(whiptail --inputbox "Adja meg a mappa nevét:" 8 50 "$attr_dir" --title "${fileNames[@]}" 3>&1 1>&2 2>&3)
+			new_attr_dir=$(whiptail --inputbox "Adja meg a mappa nevét:" 8 50 "$attr_dir" --title "${section}" 3>&1 1>&2 2>&3)
 			sed -i "/^\[${selectedFileName}\]/,/^\[/s/^dir=.*/dir=$new_attr_dir/" "$fileNameFiles"
 		elif [[ $section == $selectedFileName && $line == subdir=* ]]; then
 			attr_subdir="${line#*=}"
-			new_attr_subdir=$(whiptail --inputbox "Szeretne dátummal ellátott almappát (0 nem, 1 igen):" 8 50 "$attr_subdir" --title "${fileNames[@]}" 3>&1 1>&2 2>&3)
+			new_attr_subdir=$(whiptail --inputbox "Szeretne dátummal ellátott almappát (0 nem, 1 igen):" 8 50 "$attr_subdir" --title "${section}" 3>&1 1>&2 2>&3)
 			sed -i "/^\[${selectedFileName}\]/,/^\[/s/^subdir=.*/subdir=$new_attr_subdir/" "$fileNameFiles"
 		elif [[ $section == $selectedFileName && $line == rename=* ]]; then
 			attr_rename="${line#*=}"
-			new_attr_rename=$(whiptail --inputbox "Át szeretné nevezni a fájlokat (0 nem vagy a fájl neve):" 8 50 "$attr_rename" --title "${fileNames[@]}" 3>&1 1>&2 2>&3)
-			sed -i "/^\[${selectedFileName}\]/,/^\[/s/^rename=.*/rename=$new_attr_rename/" "$fileNameFiles"	  
+			new_attr_rename=$(whiptail --inputbox "Át szeretné nevezni a fájlokat (0 nem vagy a fájl neve):" 8 50 "$attr_rename" --title "${section}" 3>&1 1>&2 2>&3)
+			sed -i "/^\[${selectedFileName}\]/,/^\[/s/^rename=.*/rename=$new_attr_rename/" "$fileNameFiles"
 		fi
 	done < "$fileNameFiles"
-
 }
 
+function runCopy()
+{
+
+	source=$(head -n 1 $fileNameFolder)
+	target=$(head -n 2 $fileNameFolder | tail -n -1)
+
+	if [ ! -d "$source" ]; then
+ 		mkdir -p $source;
+		whiptail --title "Információ"  --msgbox "A forrás mappa nem létezett, ezért létre lett hozva. Kérem másolja bele a rendezni kívánt fájlokat." 16 60
+	fi
+
+	if [ ! -d "$target" ]; then
+ 		mkdir -p $target;
+		whiptail --title "Információ"  --msgbox "A cél mappa nem létezett, ezért létre lett hozva." 16 60
+	fi
+
+}
 
 function help()
 {
@@ -112,6 +130,7 @@ function menu()
 	"4" "Fájlok másolása"						\
 	"5" "Segítség"								\
 	"6" "Kilépés"	3>&1 1>&2 2>&3)
+
 	# választott menüpontnak megfelelő függvény hívása
 	case $ADVSEL in
 
@@ -129,6 +148,7 @@ function menu()
 		;;
 	4)
 		echo "Fájlok másolása"
+		runCopy "$fileNameFiles" "$fileNameFolder"
 		;;
 	5)
 		echo "Segítség"
