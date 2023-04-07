@@ -48,9 +48,9 @@ function setFileDetails()
 
 	# kiolvasott fájlnevek alapján radio boxos kiválasztó menü
 	selectedFileName=$(whiptail --title "Fájlok" --radiolist "Válassza ki a beállítani kívánt típust" 20 60 10 "${fileNames[@]}" "ÚJ" "" off  3>&1 1>&2 2>&3)
-
+	# ellenőrzés, hogy az új beállítás lett-e kiválasztva
 	if [ "${selectedFileName}" != "ÚJ" ]; then
-		# config fájl átírása
+		# meglévő beállítások felülírása 
 		while read -r line; do
 			if [[ $line == \[*${fileNames[$i]}*]* ]]; then
 				section="${line#[}"
@@ -70,11 +70,12 @@ function setFileDetails()
 			fi
 		done < "$fileNameFiles"
 	else
+		# új fájltípus bekérése
 		new_file_name=$(whiptail --inputbox "Adja meg az új fájl kiterjesztését pont nélkül:" 8 50 3>&1 1>&2 2>&3)
 		new_attr_dir=$(whiptail --inputbox "Adja meg a mappa nevét:" 8 50 --title "${new_file_name}" 3>&1 1>&2 2>&3)
 		new_attr_subdir=$(whiptail --inputbox "Szeretne dátummal ellátott almappát (0 nem, 1 igen):" 8 50 --title "${new_file_name}" 3>&1 1>&2 2>&3)
 		new_attr_rename=$(whiptail --inputbox "Át szeretné nevezni a fájlokat (0 nem vagy a fájl neve):" 8 50 --title "${new_file_name}" 3>&1 1>&2 2>&3)
-		
+		# új fájltípus eltárolása
 		printf "[%s]\n" $new_file_name >> $fileNameFiles
 		printf "dir=%s\n" $new_attr_dir >> $fileNameFiles
 		printf "subdir=%s\n" $new_attr_subdir >> $fileNameFiles
@@ -88,16 +89,57 @@ function runCopy()
 
 	source=$(head -n 1 $fileNameFolder)
 	target=$(head -n 2 $fileNameFolder | tail -n -1)
-
+	# elvileg ezek nem szükségesek, de már marad, legalább tájékoztatja a felhasználót,
+	# hogy a forrás mappa létre lett hozva és másoljon bele fájlokat
+	# ha nem létezik a forrás mappa, akkor létre kell hozni, illetve tájékoztatni a felhasználót
 	if [ ! -d "$source" ]; then
  		mkdir -p $source;
-		whiptail --title "Információ"  --msgbox "A forrás mappa nem létezett, ezért létre lett hozva. Kérem másolja bele a rendezni kívánt fájlokat." 16 60
+		whiptail --title "Információ" --msgbox "A forrás mappa nem létezett, ezért létre lett hozva. Kérem másolja bele a rendezni kívánt fájlokat." 16 60
 	fi
-
+	# ha nem létezik a cél mappa, akkor létre kell hozni, illetve tájékoztatni a felhasználót
 	if [ ! -d "$target" ]; then
  		mkdir -p $target;
-		whiptail --title "Információ"  --msgbox "A cél mappa nem létezett, ezért létre lett hozva." 16 60
+		whiptail --title "Információ" --msgbox "A cél mappa nem létezett, ezért létre lett hozva." 16 60
 	fi
+	# fájlok konfigból fájlnevek kiolvasása
+	while read p; do   
+
+    	if [[ "$p" == *"["* && "$p" == *"]"* ]]; then
+
+			substr=${p:1:-1}
+			fileNames[$i]=$substr
+			i=$(($i+1))
+
+		fi
+ 
+	done < $fileNameFiles
+
+	while read -r line; do
+		
+		endSection=false
+
+		if [[ $line == \[*${fileNames[$i]}*]* ]]; then
+			section="${line#[}"
+			section="${section%]}"
+		elif [[ $line == dir=* ]]; then
+			attr_dir="${line#*=}"
+		elif [[ $line == subdir=* ]]; then
+			attr_subdir="${line#*=}"
+		elif [[ $line == rename=* ]]; then
+			attr_rename="${line#*=}"
+			endSection=true
+		fi
+
+		if [ $endSection == true ]; then
+			if [[ "${target}" != */ ]]; then
+				target="${target}/"
+			fi
+
+			mkdir -p "$target$attr_dir"
+
+		fi			
+		
+	done < "$fileNameFiles" 
 
 }
 
