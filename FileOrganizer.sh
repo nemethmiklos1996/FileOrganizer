@@ -34,8 +34,8 @@ function setFileDetails()
 
     	if [[ "$p" == *"["* && "$p" == *"]"* ]]; then
 
-			substr=${p:1:-1}
-			fileNames[$i]=$substr
+			subStr=${p:1:-1}
+			fileNames[$i]=$subStr
 			i=$(($i+1))
 			fileNames[$i]=""
 			i=$(($i+1))
@@ -56,30 +56,30 @@ function setFileDetails()
 				section="${line#[}"
 				section="${section%]}"
 			elif [[ $section == $selectedFileName && $line == dir=* ]]; then
-				attr_dir="${line#*=}"
-				new_attr_dir=$(whiptail --inputbox "Adja meg a mappa nevét:" 8 50 "$attr_dir" --title "${section}" 3>&1 1>&2 2>&3)
-				sed -i "/^\[${selectedFileName}\]/,/^\[/s/^dir=.*/dir=$new_attr_dir/" "$fileNameFiles"
+				attrDir="${line#*=}"
+				newAttrDir=$(whiptail --inputbox "Adja meg a mappa nevét:" 8 50 "$attrDir" --title "${section}" 3>&1 1>&2 2>&3)
+				sed -i "/^\[${selectedFileName}\]/,/^\[/s/^dir=.*/dir=$newAttrDir/" "$fileNameFiles"
 			elif [[ $section == $selectedFileName && $line == subdir=* ]]; then
-				attr_subdir="${line#*=}"
-				new_attr_subdir=$(whiptail --inputbox "Szeretne dátummal ellátott almappát (0 nem, 1 igen):" 8 50 "$attr_subdir" --title "${section}" 3>&1 1>&2 2>&3)
-				sed -i "/^\[${selectedFileName}\]/,/^\[/s/^subdir=.*/subdir=$new_attr_subdir/" "$fileNameFiles"
+				attrSubdir="${line#*=}"
+				newAttrSubdir=$(whiptail --inputbox "Szeretne dátummal ellátott almappát (0 nem, 1 igen):" 8 50 "$attrSubdir" --title "${section}" 3>&1 1>&2 2>&3)
+				sed -i "/^\[${selectedFileName}\]/,/^\[/s/^subdir=.*/subdir=$newAttrSubdir/" "$fileNameFiles"
 			elif [[ $section == $selectedFileName && $line == rename=* ]]; then
-				attr_rename="${line#*=}"
-				new_attr_rename=$(whiptail --inputbox "Át szeretné nevezni a fájlokat (0 nem vagy a fájl neve):" 8 50 "$attr_rename" --title "${section}" 3>&1 1>&2 2>&3)
-				sed -i "/^\[${selectedFileName}\]/,/^\[/s/^rename=.*/rename=$new_attr_rename/" "$fileNameFiles"
+				attrRename="${line#*=}"
+				newAttrRename=$(whiptail --inputbox "Át szeretné nevezni a fájlokat (0 nem vagy a fájl neve):" 8 50 "$attrRename" --title "${section}" 3>&1 1>&2 2>&3)
+				sed -i "/^\[${selectedFileName}\]/,/^\[/s/^rename=.*/rename=$newAttrRename/" "$fileNameFiles"
 			fi
 		done < "$fileNameFiles"
 	else
 		# új fájltípus bekérése
-		new_file_name=$(whiptail --inputbox "Adja meg az új fájl kiterjesztését pont nélkül:" 8 50 3>&1 1>&2 2>&3)
-		new_attr_dir=$(whiptail --inputbox "Adja meg a mappa nevét:" 8 50 --title "${new_file_name}" 3>&1 1>&2 2>&3)
-		new_attr_subdir=$(whiptail --inputbox "Szeretne dátummal ellátott almappát (0 nem, 1 igen):" 8 50 --title "${new_file_name}" 3>&1 1>&2 2>&3)
-		new_attr_rename=$(whiptail --inputbox "Át szeretné nevezni a fájlokat (0 nem vagy a fájl neve):" 8 50 --title "${new_file_name}" 3>&1 1>&2 2>&3)
+		newFileName=$(whiptail --inputbox "Adja meg az új fájl kiterjesztését pont nélkül:" 8 50 3>&1 1>&2 2>&3)
+		newAttrDir=$(whiptail --inputbox "Adja meg a mappa nevét:" 8 50 --title "${newFileName}" 3>&1 1>&2 2>&3)
+		newAttrSubdir=$(whiptail --inputbox "Szeretne dátummal ellátott almappát (0 nem, 1 igen):" 8 50 --title "${newFileName}" 3>&1 1>&2 2>&3)
+		newAttrRename=$(whiptail --inputbox "Át szeretné nevezni a fájlokat (0 nem vagy a fájl neve):" 8 50 --title "${newFileName}" 3>&1 1>&2 2>&3)
 		# új fájltípus eltárolása
-		printf "[%s]\n" $new_file_name >> $fileNameFiles
-		printf "dir=%s\n" $new_attr_dir >> $fileNameFiles
-		printf "subdir=%s\n" $new_attr_subdir >> $fileNameFiles
-		printf "rename=%s\n" $new_attr_rename >> $fileNameFiles
+		printf "[%s]\n" $newFileName >> $fileNameFiles
+		printf "dir=%s\n" $newAttrDir >> $fileNameFiles
+		printf "subdir=%s\n" $newAttrSubdir >> $fileNameFiles
+		printf "rename=%s\n" $newAttrRename >> $fileNameFiles
 	fi
 
 }
@@ -106,8 +106,8 @@ function runCopy()
 
     	if [[ "$p" == *"["* && "$p" == *"]"* ]]; then
 
-			substr=${p:1:-1}
-			fileNames[$i]=$substr
+			subStr=${p:1:-1}
+			fileNames[$i]=$subStr
 			i=$(($i+1))
 
 		fi
@@ -122,11 +122,11 @@ function runCopy()
 			section="${line#[}"
 			section="${section%]}"
 		elif [[ $line == dir=* ]]; then
-			attr_dir="${line#*=}"
+			attrDir="${line#*=}"
 		elif [[ $line == subdir=* ]]; then
-			attr_subdir="${line#*=}"
+			attrSubdir="${line#*=}"
 		elif [[ $line == rename=* ]]; then
-			attr_rename="${line#*=}"
+			attrRename="${line#*=}"
 			endSection=true
 		fi
 
@@ -135,12 +135,40 @@ function runCopy()
 				target="${target}/"
 			fi
 
-			mkdir -p "$target$attr_dir"
+			mkdir -p "$target$attrDir"
 
-		fi			
+			find "$source" -type f \( -iname "*${section,,}*" -o -iname "*${section^^}*" \) | while read -r file; do		
+				creationTime=$(stat -c %W "$file")
+				formattedTime=$(date -d "@$creationTime" "+%Y-%m-%d")
+				formattedTimeWT=$(date -d "@$creationTime" "+%Y-%m-%d-%H-%M-%S")
+				newFileName="${attrRename}_${formattedTimeWT}.${section}"
 		
+				case $attrSubdir in
+				0)
+					temp=$(cp --verbose "${file}" "$target$attrDir" 2>&1 | awk '{print $NF}')
+					copiedFile="${temp%\'}"
+					copiedFile="${copiedFile#\'}"
+				
+					if [[ $attrRename != "0" ]]; then
+						mv "$copiedFile" "$target$attrDir/$newFileName"
+					fi
+					;;
+				1)
+					dirToCopy="$target$attrDir/$formattedTime"
+					mkdir -p "$dirToCopy"
+					temp=$(cp --verbose "${file}" "$dirToCopy" 2>&1 | awk '{print $NF}')
+					copiedFile="${temp%\'}"
+					copiedFile="${copiedFile#\'}"
+					
+					if [[ $attrRename != "0" ]]; then
+						mv "$copiedFile" "$dirToCopy/$newFileName"
+					fi
+					;;
+				esac
+			done
+			sleep 2
+		fi
 	done < "$fileNameFiles" 
-
 }
 
 function help()
