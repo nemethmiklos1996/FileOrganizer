@@ -145,10 +145,9 @@ function runCopy()
 		
 				case $attrSubdir in
 				0)
-					temp=$(cp --verbose "${file}" "$target$attrDir" 2>&1 | awk '{print $NF}')
-					copiedFile="${temp%\'}"
-					copiedFile="${copiedFile#\'}"
-				
+					temp=$(cp -v "$file" "$target$attrDir" 2>&1)
+					copiedFile=$(echo "$temp" | awk -F"-> " '{print $NF}' | tr -d "'")					
+
 					if [[ $attrRename != "0" ]]; then
 						mv "$copiedFile" "$target$attrDir/$newFileName"
 					fi
@@ -156,9 +155,8 @@ function runCopy()
 				1)
 					dirToCopy="$target$attrDir/$formattedTime"
 					mkdir -p "$dirToCopy"
-					temp=$(cp --verbose "${file}" "$dirToCopy" 2>&1 | awk '{print $NF}')
-					copiedFile="${temp%\'}"
-					copiedFile="${copiedFile#\'}"
+					temp=$(cp --verbose "$file" "$dirToCopy" 2>&1 | awk '{print $NF}')
+					copiedFile=$(echo "$temp" | awk -F"-> " '{print $NF}' | tr -d "'")					
 					
 					if [[ $attrRename != "0" ]]; then
 						mv "$copiedFile" "$dirToCopy/$newFileName"
