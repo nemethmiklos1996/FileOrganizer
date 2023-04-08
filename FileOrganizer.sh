@@ -120,7 +120,6 @@ function runCopy()
 	done < $fileNameFiles
 
 	while read -r line; do
-		
 		endSection=false
 
 		if [[ $line == \[*${fileNames[$i]}*]* ]]; then
@@ -170,8 +169,8 @@ function runCopy()
 				esac
 			done
 		fi
-	done < "$fileNameFiles" 
-}
+	done < "$fileNameFiles" | whiptail --gauge "Fájlok másolása folyamatban" 6 50 0
+} 
 
 function help()
 {
@@ -220,27 +219,21 @@ function menu()
 	case $ADVSEL in
 
 	1)
-		echo "Forrás mappa ellenőrzése és megadása"
 		selectSourceFolder "$fileNameFolder"
 		;;
 	2)
-		echo "Cél mappa ellenőrzése és megadása"
 		selectTargetFolder "$fileNameFolder"
 		;;
 	3)
-		echo "Fájlokra vonatkozó beállítások"
 		setFileDetails "$fileNameFiles"
 		;;
 	4)
-		echo "Fájlok másolása"
 		runCopy "$fileNameFiles" "$fileNameFolder"
 		;;
 	5)
-		echo "Segítség"
 		help
 		;;
 	6)
-		echo "Kilépés"
 		exit
 		;;
 	esac
