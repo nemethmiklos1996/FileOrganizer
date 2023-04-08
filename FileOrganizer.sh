@@ -164,7 +164,6 @@ function runCopy()
 					;;
 				esac
 			done
-			sleep 2
 		fi
 	done < "$fileNameFiles" 
 }
