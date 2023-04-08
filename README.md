@@ -1,6 +1,7 @@
 # FileOrganizer
 A program futásához whiptail telepítése szükséges. (legtöbb rendszeren nagy valószínűséggel telepítve van)<br>
 A segítség menüpont témaszt nyújt a program használatához.<br>
+A program elsődleges célja, hogy egy rendezetlen, ömlesztett fájlokat tartalmazó mappából egy célmappába másolja a megadott típusú fájlokat. A fájlokat a paraméterek alapján dátumos almappákba rendezi vagy egy beolvasott prefix és a fájlból kiolvasott létrehozási idő alapján átnevezi.
 ## Menüpontok
 ### Forrás mappa ellenőrzése és megadása
 Ebben a menüpontban a FileOrganizerFolders.cfg tartalmát lehet módosítani. A program alapértelmezetten, első indítás alkalmával létrehozza ezt a fájlt, majd Forrás mappa gyanánt a program mellé létrehoz egy source mappát, majd teljes elérési úttal a fájlba menti. Meglévő fájl esetén kiolvassa, és engedi szerkeszteni az elérési utat, manuálisan.
