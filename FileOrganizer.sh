@@ -100,6 +100,11 @@ function runCopy()
 	if [ ! -d "$target" ]; then
  		mkdir -p $target;
 		whiptail --title "Információ" --msgbox "A cél mappa nem létezett, ezért létre lett hozva." 16 60
+	else
+		if (whiptail --title "Információ" --yesno "A cél mappa létezik. Törli a tartalmát? (megtartott tartalom esetén előfordulhat, hogy bizonyos fájlok duplikálódnak)" 8 78); then
+			rm -rf "$target"
+			mkdir -p $target;
+		fi
 	fi
 	# fájlok konfigból fájlnevek kiolvasása
 	while read p; do   
